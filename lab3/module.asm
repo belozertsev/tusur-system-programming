@@ -1,6 +1,6 @@
+; int solution(int**, int, int)
 global solution
 
-; int solution(int**, int, int)
 solution:
 	; Сохранение значений регистров, чтобы после выхода из функции ничего не сломалось
 	push ebp
@@ -8,6 +8,14 @@ solution:
 	push ebx
 	push ecx
 	push edx
+
+	; ---направление заполнение стека--->
+	;     +16    +12      +8        +4    ebp   -4    -8    -12
+	;------+------+--------+---------+-----+-----+-----+-----+
+	; cols | rows | matrix | retAddr | ebp | ebx | ecx | edx |
+	;------+------+--------+---------+-----+-----+-----+-----+
+	;     +28    +24      +20       +16   +12   +8    +4    esp
+	;                      <---направление удаления из стека---
 
 	xor eax, eax			; вспомогательный регистр
 	xor ebx, ebx			; итератор по i
@@ -17,6 +25,14 @@ solution:
 	push ecx				; заносим значение итератора j в стек
 	push eax				; заносим значение суммы в стек (изначально 0)
 	push dword [ebp + 8]	; заносим текущий адрес строки в стек
+
+	; ---направление заполнение стека--->
+	;     +16    +12      +8        +4    ebp   -4    -8    -12   -16   -20   -24          -28
+	;------+------+--------+---------+-----+-----+-----+-----+-----+-----+-----+------------+
+	; cols | rows | matrix | retAddr | ebp | ebx | ecx | edx |  i  |  j  |  S  | CLAddrAddr |
+	;------+------+--------+--------+------+-----+-----+-----+-----+-----+-----+------------+
+	;     +44    +40      +36      +32    +28   +24   +20   +16   +12   +8    +4           esp
+	;                                                     <---направление удаления из стека---
 
 ; Проход по строкам
 _outerLoop:
@@ -32,10 +48,9 @@ _innerLoop:
 	; Условие выхода из цикла
 	mov ecx, dword [esp + 8]
 	cmp ecx, dword [ebp + 16]
-	
 	je _continue
 
-	mov eax, dword [esp]			; eax = CLAddrAddr, где CLAddrAddr - адрес адрсеа начала строки			
+	mov eax, dword [esp]			; eax = CLAddrAddr, где CLAddrAddr - адрес адрсеа начала строки
 	mov eax, dword [eax]			; eax = *CLAddrAddr = CLAddr - адрес начала строки
 	mov eax, dword [eax + ecx*4]	; eax = matrix[ebx][ecx]
 	mul eax							; eax = eax * eax
