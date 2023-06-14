@@ -11,6 +11,7 @@ int main() {
 			nums[i] &= ~(1 << 0);
 			nums[i] &= ~(1 << 4);
 		}
+		
 		std::cout << +nums[i] << std::endl;
 	}
 
